@@ -72,7 +72,7 @@ def main():
             if inicio > hoje:
                 print(f"{nome}: já atualizado")
                 continue
-            linhas = buscar(codigo, inicio, hoje)
+            linhas = [(d, v) for d, v in buscar(codigo, inicio, hoje) if d >= inicio]
             with conn.cursor() as cur:
                 cur.executemany(
                     """insert into raw.sgs_series (codigo_serie, nome_serie, data, valor)
