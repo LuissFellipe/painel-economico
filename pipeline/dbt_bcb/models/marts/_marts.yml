@@ -1,0 +1,10 @@
+version: 2
+
+models:
+  - name: fct_indicadores_mensais
+    description: Indicadores macroeconômicos mensais (Selic, IPCA, dólar e juro real)
+    columns:
+      - name: mes
+        tests: [unique, not_null]
+      - name: juro_real_aa
+        description: Juro real ex-post = (1+Selic)/(1+IPCA 12m) - 1

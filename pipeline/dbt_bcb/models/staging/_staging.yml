@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_bcb__series
+    columns:
+      - name: nome_serie
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['selic_meta', 'ipca_mensal', 'dolar_venda']
+      - name: data
+        tests: [not_null]
+      - name: valor
+        tests: [not_null]

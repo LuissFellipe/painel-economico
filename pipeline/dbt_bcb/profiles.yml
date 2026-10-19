@@ -1,0 +1,12 @@
+dbt_bcb:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('PGHOST', 'postgres') }}"
+      port: "{{ env_var('PGPORT', '5432') | int }}"
+      user: "{{ env_var('PGUSER', 'bcb') }}"
+      password: "{{ env_var('PGPASSWORD', 'bcb') }}"
+      dbname: "{{ env_var('PGDATABASE', 'bcb') }}"
+      schema: public
+      threads: 4

@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: sgs_series
+        description: Séries do SGS/BCB carregadas por ingest/ingest_bcb.py

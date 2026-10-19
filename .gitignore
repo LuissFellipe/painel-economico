@@ -1,0 +1,4 @@
+__pycache__/
+pipeline/dbt_bcb/target/
+pipeline/dbt_bcb/logs/
+.env
