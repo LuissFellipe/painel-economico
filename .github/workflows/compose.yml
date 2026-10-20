@@ -1,0 +1,33 @@
+name: Sobe o compose
+
+# Prova que o projeto roda como o README promete: um docker compose up, o
+# pipeline conclui a primeira execução (ingestão + dbt build com testes) e o
+# dashboard responde.
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up -d --build
+      - name: Espera a primeira execução do pipeline
+        run: |
+          for i in $(seq 1 60); do
+            if docker compose logs pipeline | grep -q "execução concluída"; then exit 0; fi
+            if docker compose logs pipeline | grep -q "execução falhou"; then docker compose logs pipeline; exit 1; fi
+            sleep 5
+          done
+          docker compose logs pipeline
+          exit 1
+      - name: Confere o dashboard e a tabela final
+        run: |
+          curl -fsS http://localhost:8501/_stcore/health
+          docker compose exec -T postgres psql -U bcb -tAc "select count(*) from marts.fct_indicadores_mensais" | grep -E '^[1-9][0-9]+$'
+      - if: always()
+        run: docker compose down -v

@@ -1,0 +1,11 @@
+version: 2
+
+seeds:
+  - name: ipca_anual_ibge
+    description: >
+      IPCA acumulado no ano, como o IBGE divulga em janeiro do ano seguinte.
+      Serve de gabarito para o IPCA 12 meses que o modelo calcula a partir do
+      IPCA mensal do BCB. Um ano novo entra aqui quando o IBGE publica.
+    columns:
+      - name: ano
+        tests: [unique, not_null]

@@ -54,10 +54,10 @@ def requisitar(url, params, tentativas=5):
 
 
 def buscar(codigo, inicio, fim):
-    registros = []
+    registros = {}
     while inicio <= fim:
         fim_janela = min(inicio + JANELA, fim)
-        registros += requisitar(
+        resposta = requisitar(
             URL.format(codigo=codigo),
             {
                 "formato": "json",
@@ -65,11 +65,14 @@ def buscar(codigo, inicio, fim):
                 "dataFinal": fim_janela.strftime("%d/%m/%Y"),
             },
         )
+        # Em série mensal, a API devolve o último mês anterior à janela quando
+        # ela começa no meio de um mês: jan/2020 vinha nas duas primeiras.
+        for r in resposta:
+            d = datetime.strptime(r["data"], "%d/%m/%Y").date()
+            if inicio <= d <= fim_janela:
+                registros[d] = r["valor"]
         inicio = fim_janela + timedelta(days=1)
-    return [
-        (datetime.strptime(r["data"], "%d/%m/%Y").date(), r["valor"])
-        for r in registros
-    ]
+    return sorted(registros.items())
 
 
 def main():

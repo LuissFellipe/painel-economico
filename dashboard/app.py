@@ -2,12 +2,10 @@ import os
 
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 import streamlit as st
-from plotly.subplots import make_subplots
 from sqlalchemy import create_engine, text
 
-engine = create_engine(os.getenv("DATABASE_URL", "postgresql+psycopg://bcb:bcb@localhost:5434/bcb"))
+engine = create_engine(os.getenv("DATABASE_URL", "postgresql+psycopg://bcb:bcb@localhost:5437/bcb"))
 
 st.set_page_config(page_title="Painel econômico", layout="wide")
 
@@ -16,6 +14,10 @@ st.set_page_config(page_title="Painel econômico", layout="wide")
 def consultar(sql):
     with engine.connect() as con:
         return pd.read_sql(text(sql), con)
+
+
+def br(valor, casas=2):
+    return f"{valor:,.{casas}f}".replace(",", "_").replace(".", ",").replace("_", ".")
 
 
 def tabela_existe(nome):
@@ -37,23 +39,29 @@ df = df[df.mes.dt.year.between(*anos)]
 
 ultimo = df.dropna(subset=["ipca_12m"]).iloc[-1]
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Selic (média do mês)", f"{ultimo.selic_media_aa:.2f}% a.a.")
-c2.metric("IPCA 12 meses", f"{ultimo.ipca_12m:.2f}%")
-c3.metric("Juro real", f"{ultimo.juro_real_aa:.2f}% a.a.")
-c4.metric("Dólar médio", f"R$ {ultimo.dolar_medio:.2f}")
+c1.metric("Selic (média do mês)", f"{br(ultimo.selic_media_aa)}% a.a.")
+c2.metric("IPCA 12 meses", f"{br(ultimo.ipca_12m)}%")
+c3.metric("Juro real", f"{br(ultimo.juro_real_aa)}% a.a.")
+c4.metric("Dólar médio", f"R$ {br(ultimo.dolar_medio)}")
 st.caption(f"Referência: {ultimo.mes:%m/%Y}")
 
-st.subheader("Juros e inflação")
-st.plotly_chart(
-    px.line(df, x="mes", y=["selic_media_aa", "ipca_12m", "juro_real_aa"],
-            labels={"mes": "", "value": "% ao ano", "variable": ""}),
-    use_container_width=True,
-)
+CORES = {"Selic": "#2a78d6", "IPCA 12 meses": "#eb6834", "Juro real": "#1baf7a"}
+NOMES = {"selic_media_aa": "Selic", "ipca_12m": "IPCA 12 meses", "juro_real_aa": "Juro real"}
 
-st.subheader("Selic e dólar")
-fig = make_subplots(specs=[[{"secondary_y": True}]])
-fig.add_trace(go.Scatter(x=df.mes, y=df.selic_media_aa, name="Selic % a.a."), secondary_y=False)
-fig.add_trace(go.Scatter(x=df.mes, y=df.dolar_medio, name="Dólar R$"), secondary_y=True)
+st.subheader("Juros e inflação")
+juros = df.melt(id_vars="mes", value_vars=list(NOMES), var_name="serie", value_name="valor")
+juros["serie"] = juros.serie.map(NOMES)
+fig = px.line(juros, x="mes", y="valor", color="serie", color_discrete_map=CORES,
+              labels={"mes": "", "valor": "% ao ano", "serie": ""})
+fig.update_layout(separators=",.", legend=dict(orientation="h", y=1.08), hovermode="x unified")
+st.plotly_chart(fig, use_container_width=True)
+
+# Dólar em gráfico próprio: Selic (%) e dólar (R$) num eixo duplo sugeririam
+# uma relação que depende só de como as duas escalas foram alinhadas.
+st.subheader("Dólar")
+fig = px.line(df, x="mes", y="dolar_medio", labels={"mes": "", "dolar_medio": "R$ (média do mês)"},
+              color_discrete_sequence=["#2a78d6"])
+fig.update_layout(separators=",.", hovermode="x unified")
 st.plotly_chart(fig, use_container_width=True)
 
 if tabela_existe("raw.execucoes"):

@@ -6,5 +6,20 @@ models:
     columns:
       - name: mes
         tests: [unique, not_null]
+      - name: selic_media_aa
+        description: Média da Selic meta nos dias do mês, em % ao ano.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments: {min_value: 0, max_value: 50}
+      - name: ipca_12m
+        description: IPCA acumulado em 12 meses, composto. Nulo quando a janela não tem 12 meses.
       - name: juro_real_aa
         description: Juro real ex-post = (1+Selic)/(1+IPCA 12m) - 1
+        tests:
+          - dbt_utils.accepted_range:
+              arguments: {min_value: -20, max_value: 30}
+      - name: dolar_medio
+        tests:
+          - dbt_utils.accepted_range:
+              arguments: {min_value: 1, max_value: 15}

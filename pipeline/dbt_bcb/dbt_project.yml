@@ -10,3 +10,7 @@ models:
     marts:
       +materialized: table
       +schema: marts
+
+seeds:
+  dbt_bcb:
+    +schema: seeds

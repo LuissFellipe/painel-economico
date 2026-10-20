@@ -6,7 +6,7 @@ services:
       POSTGRES_PASSWORD: bcb
       POSTGRES_DB: bcb
     ports:
-      - "5434:5432"
+      - "5437:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
