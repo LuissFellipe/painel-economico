@@ -1,6 +1,6 @@
 # Painel econômico: pipeline agendado + dashboard
 
-Projeto integrador. O [pipeline ELT do Banco Central](../pipeline-bcb) roda sozinho todo dia, e um dashboard lê as tabelas finais. Tudo sobe com um comando.
+Projeto integrador. O [pipeline ELT do Banco Central](https://github.com/LuissFellipe/pipeline-bcb) roda sozinho todo dia, e um dashboard lê as tabelas finais. Tudo sobe com um comando.
 
 **Pergunta:** como juros, inflação e câmbio se comportaram desde 2015, e qual é o juro real hoje?
 
